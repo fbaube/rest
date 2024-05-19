@@ -68,6 +68,7 @@ func RunRest(portNr int) error {
 	if portNr == 0 { // env.RestPort
 		return nil
 	}
+	println("RUN REST")
 	sRestPortNr = strconv.Itoa(portNr)
 
 	mux := http.NewServeMux()
@@ -86,19 +87,25 @@ func RunRest(portNr int) error {
 		func(ctx CTX.Context, Z *struct{}) (*HtmlRsp, error) {
 		println("GET-STATIC")
 		pRsp := new(HtmlRsp)
-		pRsp.ContentType = "text/html" 
+		pRsp.ContentType = "text/html"
+		sTop, eTop := GetFrag("top")
+		sMid, eMid := GetFrag("mid")
+		sAbt, eAbt := GetBody("about")
+		sBtm, eBtm := GetFrag("btm")
 		pRsp.Body = []byte(
-			"<!DOCTYPE html>\n<html>\n<body>\nABOUT!\n" +
-			"</body></html>")
+			// "<!DOCTYPE html>\n<html>\n<body>\nABOUT!\n" +
+			// "</body></html>")
+			sTop + sMid + sAbt + sBtm)
+		fmt.Printf("%v %v %v %v \n", eTop, eMid, eAbt, eBtm)
 		return pRsp, nil
 	})
 
 	// fmt.Printf("API: %+v \n", api)
 
+	println("==> Running Huma-REST server on port:", 8888) // sRestPortNr)
 	// Start the server!
 	http.ListenAndServe("127.0.0.1:8888", mux)
 	// http.ListenAndServe("localhost:8888", mux)
-	println("==> Running Huma-REST server on port:", sRestPortNr)
 	return nil
 }
 
