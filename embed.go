@@ -4,17 +4,25 @@ import(
 	"embed"
 	"io"
 	"io/fs"
+	"os"
 	"fmt"
 	S "strings"
+	FP "path/filepath"
 	)
 
 //go:embed embedfs
 var EmbedFS embed.FS
 // data, _ := f.ReadFile("hello.txt")
 
+var Sep = string(os.PathSeparator)
+
 func init() {
      ListFS(&EmbedFS)
+     cache = make(map[string]string)
      }
+
+// cache maps simple file names to redd-in file contents.
+var cache map[string]string
 
 /*
 https://pkg.go.dev/embed#hdr-File_Systems
@@ -63,27 +71,65 @@ func ListFS(pFS *embed.FS) error {
      return nil
      }
 
-func GetBody(s string) (string, error) {
-     if !S.HasSuffix(s, ".hb") {
-     	s += ".hb"
+func GetContents(path string) (string, error) {
+     var s string
+     var e error 
+     var pathSubdir string
+     var pathFilext string
+     var newPath string 
+     var ok bool
+     var f fs.File 
+     
+     // Try the path as-is
+     if s,ok = cache[path]; ok {
+     	return s, nil
 	}
-     f,e := EmbedFS.Open("embedfs/h-body/" + s)
+	
+     // Analyse the path
+     // Does it include a file extension ? 
+     if fext := FP.Ext(path); fext != "" && len(fext) >= 2 {
+     	// Form a subdir name from it (omitting the dot) 
+	pathFilext = S.ToLower(fext[1:])
+	println("path filext:", pathFilext)
+	}
+     // Does it include a subdirectory ? 
+     if S.Contains(path, Sep) {
+	pathSubdir = S.ToLower(path[:S.Index(path, Sep)])
+	println("path subdir:", pathSubdir)
+	}
+	
+     // If it has a file extension but no subdir, try prepending
+     // the file extension (lowercased) to the path as a subdir 
+     if pathFilext != "" && pathSubdir == "" {
+	newPath = S.ToLower(pathFilext) + Sep + path
+	if s,ok = cache[newPath]; ok {
+	   return s, nil
+	   }
+	}
+     // If it has a subdir but no file extension, try appending
+     // the subdir (lowercased) to the path as a file extension 
+     if pathSubdir != "" && pathFilext == "" { 
+	newPath = path + "." + S.ToLower(pathFilext)
+	if s,ok = cache[newPath]; ok {
+	   return s, nil
+	   }
+	}
+	
+     // Here we know that we do not have it cached, so fetch
+     // it out of [EmbedFS]. Use newPath, which should have 
+     // all the filepath parts we use for naming & organising. 
+     f,e = EmbedFS.Open("embedfs" + Sep + newPath) 
      if e != nil {
-     	return "", fmt.Errorf("rest.embed.GetBody(%s): %w", s, e)
+     	if newPath != "" {
+	   newPath = " (or " + newPath + ")"
+	   return "", fmt.Errorf(
+	   	"rest.embed.GetContents(%s%s): %w", path, newPath, e)
+ 	   }
 	}
      bb, ee := io.ReadAll(f)
-     return string(bb), ee
-     }
-
-func GetFrag(s string) (string, error) {
-     if !S.HasSuffix(s, ".hf") {
-     	s += ".hf"
-	}
-     f,e := EmbedFS.Open("embedfs/h-frag/" + s)
-     if e != nil {
-     	return "", fmt.Errorf("rest.embed.GetFrag(%s): %w", s, e)
-	}
-     bb, ee := io.ReadAll(f)
-     return string(bb), ee
+     s = string(bb)
+     cache[path] = s
+     if newPath != "" { cache[newPath] = s } 
+     return s, ee
      }
 

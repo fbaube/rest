@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"cmp"
 	// L "github.com/fbaube/mlog"
 	// "github.com/gorilla/mux"
 	"net/http"
@@ -88,16 +89,16 @@ func RunRest(portNr int) error {
 		println("GET-STATIC")
 		pRsp := new(HtmlRsp)
 		pRsp.ContentType = "text/html"
-		sTop, eTop := GetFrag("top")
-		sMid, eMid := GetFrag("mid")
-		sAbt, eAbt := GetBody("about")
-		sBtm, eBtm := GetFrag("btm")
+		sTop, eTop := GetContents("top.hf")
+		sMid, eMid := GetContents("mid.hf")
+		sAbt, eAbt := GetContents("about.hb")
+		sBtm, eBtm := GetContents("btm.hf")
 		pRsp.Body = []byte(
 			// "<!DOCTYPE html>\n<html>\n<body>\nABOUT!\n" +
 			// "</body></html>")
 			sTop + sMid + sAbt + sBtm)
 		fmt.Printf("%v %v %v %v \n", eTop, eMid, eAbt, eBtm)
-		return pRsp, nil
+		return pRsp, cmp.Or(eTop, eMid, eAbt, eBtm, nil)
 	})
 
 	// fmt.Printf("API: %+v \n", api)
