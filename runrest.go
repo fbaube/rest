@@ -46,7 +46,7 @@ func RunRest(portNr int, aDB DR.SimpleRepo) error {
 		return nil
 	}
 	if aDB == nil { return nil }
-	println("RUN REST")
+	println("runrest.go: RUN REST")
 	sRestPortNr = strconv.Itoa(portNr)
 	the_m5db = aDB 
 	
@@ -57,11 +57,11 @@ func RunRest(portNr int, aDB DR.SimpleRepo) error {
 /*
 	mux.HandleFunc(  "POST /{table}/",      hCreate)
 	mux.HandleFunc("DELETE /{table}/",      hDeleteAll)
-	mux.HandleFunc(   "GET /{table}/",      hGetAll)
 	mux.HandleFunc("DELETE /{table}/{id}/", hDeleteByID)
+	mux.HandleFunc(   "GET /tag/{tag}/",    hMultiGetByTag)
 */
+	mux.HandleFunc(   "GET /{table}/",      hGetAll)
 	mux.HandleFunc(   "GET /{table}/{id}/", hGetByID)
-//	mux.HandleFunc(   "GET /tag/{tag}/",    hMultiGetByTag)
 /*
 	huma.Get(api, "/about",
 		pRsp.ContentType = "text/html"
@@ -76,17 +76,16 @@ func RunRest(portNr int, aDB DR.SimpleRepo) error {
 		return pRsp, cmp.Or(eTop, eMid, eAbt, eBtm, nil)
 */
 	// fmt.Printf("API: %+v \n", api)
-	println("==> Running REST server on port:", 8888) // sRestPortNr)
+	println("==> Running REST server on port:", 8000) // sRestPortNr)
 	// Start the server!
-	http.ListenAndServe("127.0.0.1:8888", mux)
+	http.ListenAndServe("127.0.0.1:8000", mux)
 	// http.ListenAndServe("localhost:8888", mux)
 	return nil
 }
 
-// TIME ABOUT HEALTH CONTACT RSS FUNC 
+// TIME ABOUT HEALTH CONTACT RSS FUNC CFG ENV ADMIN STC DB
 
 /*
-
 	// ADMIN
 	r.HandleFunc("/stc", hdlStcRoot)
 	// TOPICS, MAPS, DATABASE, STATIC CONTENT
@@ -182,9 +181,13 @@ func StcRootHdlr(w http.ResponseWriter, r *http.Request) {
 // func DRS.DoSelectByIdGeneric[T DRM.RowModel](pSR *SqliteRepo, anID int, pDest T) (bool, error) 
 
 func hGetByID(w http.ResponseWriter, req *http.Request) {
-  L.L.Info("Handling get task at %s", req.URL.Path)
+  L.L.Info("Handling get-by-id at %s", req.URL.Path)
 
   tbl := req.PathValue("table")
+  if tbl == "" {
+    http.Error(w, "invalid table", http.StatusBadRequest)
+    return
+  }
   id, err := strconv.Atoi(req.PathValue("id"))
   if err != nil {
     http.Error(w, "invalid id", http.StatusBadRequest)
@@ -192,16 +195,40 @@ func hGetByID(w http.ResponseWriter, req *http.Request) {
   }
   // ok, e := DRS.DoSelectByIdGeneric(the_m5db, id, typedBuf)
   rq := new(DR.RestQuery)
-  rq.DBOp = "get"
+  rq.DBOp = http.MethodGet // "get"
   rq.Table = tbl
   rq.Id1 = id
+  // RunQuery1(*DRU.QuerySpec) (any, error)
+  // Any, e := RunQuery1(rq)
   
   if err != nil {
     http.Error(w, err.Error(), http.StatusNotFound)
     return
   }
 
-  //renderJSON(w, task)
+  // renderJSON(w, task)
+}
+
+func hGetAll(w http.ResponseWriter, req *http.Request) {
+  L.L.Info("Handling get-all at %s", req.URL.Path)
+
+  tbl := req.PathValue("table")
+  if tbl == "" {
+    http.Error(w, "invalid table", http.StatusBadRequest)
+    return
+  }
+  // ok, e := DRS.DoSelectByIdGeneric(the_m5db, id, typedBuf)
+  rq := new(DR.RestQuery)
+  rq.DBOp = "get"
+  rq.Table = tbl
+  rq.Id1 = -1
+/*
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusNotFound)
+    return
+  }
+*/
+  // renderJSON(w, task)
 }
 
 // func DRS.DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) 
