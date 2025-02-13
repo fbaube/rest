@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.4
 
 require (
-	github.com/fbaube/datarepo v0.0.0-20250203183823-959ec19c1893
+	github.com/fbaube/datarepo v0.0.0-20250213120338-f3055dba645d
 	github.com/fbaube/m5db v0.0.0-20240509180501-84aae2bef357
 	github.com/fbaube/mlog v0.0.0-20240425064535-3b89e3b28a76
 )

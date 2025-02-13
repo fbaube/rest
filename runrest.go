@@ -21,14 +21,14 @@ import (
 //	S "strings"
 //	"github.com/fbaube/m5db"
 	"encoding/json"
-	DR "github.com/fbaube/datarepo"
+	DRP "github.com/fbaube/datarepo"
 //	DRM "github.com/fbaube/datarepo/rowmodels"
 //	DRS "github.com/fbaube/datarepo/sqlite"
 )
 
 var sRestPortNr string
 
-var the_m5db DR.SimpleRepo
+var the_m5db DRP.SimpleRepo
 
 // THIS IS JUST A DATASTORE !
 /*
@@ -41,7 +41,7 @@ func NewTaskServer() *taskServer {
 }
 */
 
-func RunRest(portNr int, aDB DR.SimpleRepo) error {
+func RunRest(portNr int, aDB DRP.SimpleRepo) error {
 	if portNr == 0 { // env.RestPort
 		return nil
 	}
@@ -194,7 +194,7 @@ func hGetByID(w http.ResponseWriter, req *http.Request) {
     return
   }
   // ok, e := DRS.DoSelectByIdGeneric(the_m5db, id, typedBuf)
-  rq := new(DR.RestQuery)
+  rq := new(DRP.RestQuery)
   rq.DBOp = http.MethodGet // "get"
   rq.Table = tbl
   rq.Id1 = id
@@ -218,7 +218,7 @@ func hGetAll(w http.ResponseWriter, req *http.Request) {
     return
   }
   // ok, e := DRS.DoSelectByIdGeneric(the_m5db, id, typedBuf)
-  rq := new(DR.RestQuery)
+  rq := new(DRP.RestQuery)
   rq.DBOp = "get"
   rq.Table = tbl
   rq.Id1 = -1

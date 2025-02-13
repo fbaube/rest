@@ -16,6 +16,8 @@ github.com/fbaube/datarepo v0.0.0-20250202180039-362029aceb3c h1:KrDeqPwkppLdbe5
 github.com/fbaube/datarepo v0.0.0-20250202180039-362029aceb3c/go.mod h1:ot2lbfQLkAH+lPhJrwPdCzKRa3+1cCAcgkiXDpjdGzU=
 github.com/fbaube/datarepo v0.0.0-20250203183823-959ec19c1893 h1:7aBaWIEDZ/gvQ7FvI+a0fgscFzwzLrHsHINtzBlkYow=
 github.com/fbaube/datarepo v0.0.0-20250203183823-959ec19c1893/go.mod h1:oq6GpJwy94G3y83tNdH94AALog31byTlrJwpUUMAZlU=
+github.com/fbaube/datarepo v0.0.0-20250213120338-f3055dba645d h1:cQLKblCin0C1a5en+VR7RrOe1Sfe+KTHfX4wJuw6OmE=
+github.com/fbaube/datarepo v0.0.0-20250213120338-f3055dba645d/go.mod h1:WFIZPbkCMDg25ErnHP6RriruOkJDegZv7Nr/SZEksWE=
 github.com/fbaube/dsmnd v0.0.0-20241113194348-8bcb3be2decd h1:UQ+HjDNZF2TZF4u2rh6uTr0sp0L6v9tw2uipcluNNe0=
 github.com/fbaube/dsmnd v0.0.0-20241113194348-8bcb3be2decd/go.mod h1:YVvG9X9nrUoOtk9DEkyyk6/0vdfNcDYHNWgBwGHbcUE=
 github.com/fbaube/dsmnd v0.0.0-20250111125333-2b80f885bfc2 h1:MP/O0PUVCGgNmKvKmM6dLi/r0PbUl/1bVCr8zuJLzkw=
