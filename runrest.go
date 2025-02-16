@@ -30,17 +30,6 @@ var sRestPortNr string
 
 var the_m5db DRP.SimpleRepo
 
-// THIS IS JUST A DATASTORE !
-/*
-type taskServer struct {
-	store *taskstore.TaskStore
-}
-func NewTaskServer() *taskServer {
-	store := taskstore.New()
-	return &taskServer{store: store}
-}
-*/
-
 func RunRest(portNr int, aDB DRP.SimpleRepo) error {
 	if portNr == 0 { // env.RestPort
 		return nil
@@ -91,7 +80,7 @@ func RunRest(portNr int, aDB DRP.SimpleRepo) error {
 	// TOPICS, MAPS, DATABASE, STATIC CONTENT
 	rtrTpc := r.PathPrefix("/tpc").Subrouter()
 	rtrMap := r.PathPrefix("/map").Subrouter()
-	rtrDb := r.PathPrefix("/db").Subrouter()
+	rtrDb  := r.PathPrefix("/db" ).Subrouter()
 	// HOME (incl. "About", etc.)
 	r.HandleFunc("/", HomeHandler)
 
@@ -185,19 +174,21 @@ func hGetByID(w http.ResponseWriter, req *http.Request) {
 
   tbl := req.PathValue("table")
   if tbl == "" {
+    // should not happen 
     http.Error(w, "invalid table", http.StatusBadRequest)
     return
   }
   id, err := strconv.Atoi(req.PathValue("id"))
   if err != nil {
-    http.Error(w, "invalid id", http.StatusBadRequest)
+    http.Error(w, "invalid id (not a number?)", http.StatusBadRequest)
     return
   }
   // ok, e := DRS.DoSelectByIdGeneric(the_m5db, id, typedBuf)
-  rq := new(DRP.RestQuery)
+  rq := new(DRP.UniquerySpec[int])
   rq.DBOp = http.MethodGet // "get"
   rq.Table = tbl
-  rq.Id1 = id
+  rq.Field = "id"
+  rq.Value = id
   // RunQuery1(*DRU.QuerySpec) (any, error)
   // Any, e := RunQuery1(rq)
   
@@ -218,7 +209,7 @@ func hGetAll(w http.ResponseWriter, req *http.Request) {
     return
   }
   // ok, e := DRS.DoSelectByIdGeneric(the_m5db, id, typedBuf)
-  rq := new(DRP.RestQuery)
+  rq := new(DRP.QuerySpec)
   rq.DBOp = "get"
   rq.Table = tbl
   rq.Id1 = -1
