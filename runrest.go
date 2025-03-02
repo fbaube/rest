@@ -18,12 +18,10 @@ import (
 	L "github.com/fbaube/mlog"
 	"net/http"
 	"strconv"
-//	S "strings"
 //	"github.com/fbaube/m5db"
 	"encoding/json"
 	DRP "github.com/fbaube/datarepo"
-//	DRM "github.com/fbaube/datarepo/rowmodels"
-//	DRS "github.com/fbaube/datarepo/sqlite"
+	DRS "github.com/fbaube/datarepo/sqlite"
 )
 
 var sRestPortNr string
@@ -167,7 +165,7 @@ func StcRootHdlr(w http.ResponseWriter, r *http.Request) {
 
 */
 
-// func DRS.DoSelectByIdGeneric[T DRM.RowModel](pSR *SqliteRepo, anID int, pDest T) (bool, error) 
+// func DRP.DoSelectByIdGeneric[T DRM.RowModel](pSR SimpleRepo, anID int, pDest T) (bool, error) 
 
 func hGetByID(w http.ResponseWriter, req *http.Request) {
   L.L.Info("Handling get-by-id at %s", req.URL.Path)
@@ -183,19 +181,29 @@ func hGetByID(w http.ResponseWriter, req *http.Request) {
     http.Error(w, "invalid id (not a number?)", http.StatusBadRequest)
     return
   }
+  /*
   // ok, e := DRS.DoSelectByIdGeneric(the_m5db, id, typedBuf)
-  rq := new(DRP.UniquerySpec[int])
+  rq := new(DRP.UniquerySpec)
   rq.DBOp = http.MethodGet // "get"
   rq.Table = tbl
   rq.Field = "id"
-  rq.Value = id
+  rq.Value = strconv.Itoa(id)
   // RunQuery1(*DRU.QuerySpec) (any, error)
-  // Any, e := RunQuery1(rq)
-  
+  Any, e := DRP.RunUniquerySpec(the_m5db, rq)
+  */
+  pTD := DRS.GetTableDetailsByCode(tbl)
+  // func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DRP.UniquerySpec, RM DRM.RowModel) (error, int)
+  // DBOp, Table, Field, Value string
+  ws := new(DRP.UniquerySpec)
+  ws.Field = pTD.StorName
+  ws.Value = strconv.Itoa(id)
+  pBuffer := pTD.BlankInstance
+  err, nGotn := the_m5db.EngineUnique("GET", tbl, ws, pBuffer)
   if err != nil {
     http.Error(w, err.Error(), http.StatusNotFound)
     return
   }
+  if nGotn == 0 { panic("NOT FOUND") }
 
   // renderJSON(w, task)
 }
