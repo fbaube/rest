@@ -1,6 +1,19 @@
 package rest
 
 /*
+https://pkg.go.dev/net/http#ResponseWriter
+Write([]byte) (int, error)
+If [ResponseWriter.WriteHeader] has not yet been called,
+Write calls WriteHeader(http.StatusOK) before writing the
+data. If the Header does not contain a Content-Type line,
+Write adds a Content-Type set to the result of passing the
+initial 512 bytes of written data to [DetectContentType].
+Also, if the total size of all written data is under a
+few KB and there are no Flush calls, the Content-Length
+header is added automatically.
+*/
+
+/*
 NEW WAY:
 1) Let tbl := {table} from the request
 2) Get tbl's TblDesc
@@ -192,20 +205,27 @@ func hGetByID(w http.ResponseWriter, req *http.Request) {
   Any, e := DRP.RunUniquerySpec(the_m5db, rq)
   */
   pTD := DRS.GetTableDetailsByCode(tbl)
+  if pTD == nil {
+     println("NO TABLE DETAILS!")
+     return
+     }
   // func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DRP.UniquerySpec, RM DRM.RowModel) (error, int)
   // DBOp, Table, Field, Value string
-  ws := new(DRP.UniquerySpec)
-  ws.Field = pTD.StorName
-  ws.Value = strconv.Itoa(id)
-  pBuffer := pTD.BlankInstance
-  err, nGotn := the_m5db.EngineUnique("GET", tbl, ws, pBuffer)
+  fv := new(DRP.FieldValuePair) // UniquerySpec)
+  fv.Field = pTD.PKname
+  fv.Value = strconv.Itoa(id)
+  pBuffer := pTD.NewInstance() // BlankInstance
+  err, nGotn := the_m5db.EngineUnique("GET", tbl, fv, pBuffer)
   if err != nil {
-    http.Error(w, err.Error(), http.StatusNotFound)
-    return
+     http.Error(w, "EngineUnique failed: " + err.Error(), http.StatusNotFound)
+     return
   }
-  if nGotn == 0 { panic("NOT FOUND") }
-
-  // renderJSON(w, task)
+  if nGotn == 0 { 
+     ermsg := "Unique field <" + fv.Field + "=" + fv.Value + "> not found: "
+     http.Error(w, ermsg + err.Error(), http.StatusNotFound)
+     return
+  }
+  renderJSON(w, pBuffer)
 }
 
 func hGetAll(w http.ResponseWriter, req *http.Request) {
