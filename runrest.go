@@ -28,10 +28,10 @@ ever knowing the specific types of the RowModels's ?
 */
 
 import (
+       "fmt"
 	L "github.com/fbaube/mlog"
 	"net/http"
 	"strconv"
-//	"github.com/fbaube/m5db"
 	"encoding/json"
 	DRP "github.com/fbaube/datarepo"
 	DRS "github.com/fbaube/datarepo/sqlite"
@@ -209,20 +209,16 @@ func hGetByID(w http.ResponseWriter, req *http.Request) {
      println("NO TABLE DETAILS!")
      return
      }
-  // func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DRP.UniquerySpec, RM DRM.RowModel) (error, int)
-  // DBOp, Table, Field, Value string
-  fv := new(DRP.FieldValuePair) // UniquerySpec)
-  fv.Field = pTD.PKname
-  fv.Value = strconv.Itoa(id)
+  // func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, RM DRM.RowModel) (int, error)
   pBuffer := pTD.NewInstance() // BlankInstance
-  err, nGotn := the_m5db.EngineUnique("GET", tbl, fv, pBuffer)
+  nGotn, err := the_m5db.EngineUnique("GET", tbl, id, pBuffer)
   if err != nil {
      http.Error(w, "EngineUnique failed: " + err.Error(), http.StatusNotFound)
      return
   }
   if nGotn == 0 { 
-     ermsg := "Unique field <" + fv.Field + "=" + fv.Value + "> not found: "
-     http.Error(w, ermsg + err.Error(), http.StatusNotFound)
+     ermsg := fmt.Sprintf("ID<%d> not found: %w", id, err)
+     http.Error(w, ermsg, http.StatusNotFound)
      return
   }
   renderJSON(w, pBuffer)
