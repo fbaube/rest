@@ -204,7 +204,10 @@ func hGetByID(w http.ResponseWriter, req *http.Request) {
   // RunQuery1(*DRU.QuerySpec) (any, error)
   Any, e := DRP.RunUniquerySpec(the_m5db, rq)
   */
-  pTD := DRS.GetTableDetailsByCode(tbl)
+  pTD := DRS.GetTableDetailsByDispName(tbl)
+  if pTD == nil {
+     pTD = DRS.GetTableDetailsByStorName(tbl)
+     }
   if pTD == nil {
      println("NO TABLE DETAILS!")
      return

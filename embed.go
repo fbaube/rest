@@ -55,7 +55,7 @@ func ListFS(pFS *embed.FS) error {
      if e != nil {
      	return fmt.Errorf("ListFS(.): %w", e)
 	}
-     fmt.Printf("dot: %+v \n", DE)
+     fmt.Printf("m5app/rest/embedfs: %+v \n", DE)
      
      DE, e = pFS.ReadDir("embedfs/h-body")
      if e != nil {
